@@ -1,380 +1,181 @@
-@import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600;6..12,700;6..12,800;6..12,900&display=swap');
+@import 'tailwindcss';
 
-/* Nunito Sans (claymorphism) + Plus Jakarta Sans (legacy headlines) + Inter (body) */
-:root { font-family: 'Nunito Sans', 'Inter', ui-sans-serif, system-ui, sans-serif; }
-h1, h2, h3, .syne, .display-font { font-family: 'Nunito Sans', 'Plus Jakarta Sans', 'Inter', sans-serif; letter-spacing: -0.01em; }
+/* ============================================================
+   BURGUNDY RESIDENCES — Heritage Modern Design System
+   ============================================================ */
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-pink-primary: #E91E8C;
-  --color-pink-light: #FF6BB5;
-  --color-pink-pale: #FFF0F7;
-  --color-pink-50: #FFF8F4;
-  --color-pink-100: #FCE7F3;
-  --color-pink-200: #FBCFE8;
-  --color-pink-300: #F9A8D4;
-  --color-pink-400: #F472B6;
-  --color-pink-500: #EC4899;
-  --color-pink-600: #E91E8C;
-  --color-pink-700: #BE185D;
-  --color-blue-accent: #4FC3F7;
-  --color-blue-light: #E0F7FF;
-  --color-navy: #1A1A2E;
-  --color-surface: #FAFAFA;
-  --radius-card: 1.25rem;
-  --shadow-card: 0 4px 24px rgba(233, 30, 140, 0.08);
-  --shadow-card-hover: 0 8px 40px rgba(233, 30, 140, 0.15);
+  /* --- Burgundy: the spine of the brand --- */
+  --color-wine-50:  #FDF7F9;
+  --color-wine-100: #F7E7ED;
+  --color-wine-200: #EDCBD8;
+  --color-wine-300: #DDA2B8;
+  --color-wine-400: #C4708F;
+  --color-wine-500: #A64A6C;
+  --color-wine-600: #8A2B4C;
+  --color-wine-700: #6B1F3A;
+  --color-wine-800: #52142E;
+  --color-wine-900: #3A0E20;
+  --color-wine-950: #240711;
+
+  /* --- Brass: the accent that makes it feel expensive --- */
+  --color-brass-100: #F7EEDF;
+  --color-brass-200: #EBD8B8;
+  --color-brass-300: #DCBE98;
+  --color-brass-400: #C9A46B;
+  --color-brass-500: #A8763E;
+  --color-brass-600: #8A5F2F;
+
+  /* --- Warm neutrals: paper, not grey --- */
+  --color-cream-50:  #FEFCFA;
+  --color-cream-100: #FBF7F2;
+  --color-cream-200: #F4EDE4;
+  --color-cream-300: #E8DDD0;
+  --color-ink-400:   #9A8B8F;
+  --color-ink-500:   #6B5C61;
+  --color-ink-700:   #403236;
+  --color-ink-900:   #241A1D;
+
+  /* --- Sage: the calm secondary --- */
+  --color-sage-100: #E4EDE7;
+  --color-sage-500: #4A6B57;
+  --color-sage-700: #35503F;
+
+  /* --- Semantic states --- */
+  --color-ok-100:   #E1F0E7;
+  --color-ok-600:   #2F7A4E;
+  --color-warn-100: #FBEEDC;
+  --color-warn-600: #A9701A;
+  --color-bad-100:  #FBE6E4;
+  --color-bad-600:  #A8322C;
+  --color-info-100: #E3EDF5;
+  --color-info-600: #35618A;
+
+  /* --- Type --- */
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* --- Radii: architectural, not bubbly --- */
+  --radius-card: 20px;
+  --radius-btn: 12px;
+  --radius-field: 10px;
+
+  /* --- Shadows: warm-tinted, never grey-black --- */
+  --shadow-soft: 0 1px 2px rgba(59, 14, 32, 0.04), 0 4px 16px rgba(59, 14, 32, 0.06);
+  --shadow-lift: 0 2px 4px rgba(59, 14, 32, 0.05), 0 12px 32px rgba(59, 14, 32, 0.10);
+  --shadow-deep: 0 8px 24px rgba(59, 14, 32, 0.12), 0 24px 64px rgba(59, 14, 32, 0.16);
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-::-webkit-scrollbar-thumb {
-  background: #E91E8C;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #BE185D;
-}
-
-/* Pink gradient */
-.gradient-pink {
-  background: linear-gradient(135deg, #E91E8C 0%, #FF6BB5 50%, #FFB3D9 100%);
-}
-
-.gradient-pink-soft {
-  background: linear-gradient(135deg, #FFF8F4 0%, #FCE7F3 100%);
-}
-
-.gradient-hero {
-  background: linear-gradient(135deg, #E91E8C 0%, #FF6BB5 40%, #FFD6EC 80%, #FFF8F4 100%);
-}
-
-/* Kiosk specific styles */
-.kiosk-mode {
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: default;
-}
-
-.kiosk-mode * {
-  cursor: default !important;
-}
-
-/* Touch feedback */
-.touch-btn:active {
-  transform: scale(0.97);
-  transition: transform 0.1s ease;
-}
-
-/* Card glow */
-.card-glow {
-  box-shadow: 0 4px 24px rgba(233, 30, 140, 0.12);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.card-glow:hover {
-  box-shadow: 0 8px 40px rgba(233, 30, 140, 0.2);
-  transform: translateY(-2px);
-}
-
-/* Mobile app specific */
-.mobile-safe-top {
-  padding-top: env(safe-area-inset-top, 20px);
-}
-
-.mobile-safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 20px);
-}
-
-/* PWA standalone mode */
-@media (display-mode: standalone) {
-  .pwa-only {
-    display: block;
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
   }
-  .no-pwa {
-    display: none;
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
-}
 
-/* Animations */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes pulse-pink {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(233, 30, 140, 0.4); }
-  50% { box-shadow: 0 0 0 12px rgba(233, 30, 140, 0); }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.animate-float { animation: float 3s ease-in-out infinite; }
-.animate-pulse-pink { animation: pulse-pink 2s ease-in-out infinite; }
-.animate-slide-up { animation: slideUp 0.5s ease forwards; }
-.animate-fade-in { animation: fadeIn 0.4s ease forwards; }
-
-/* Typography helpers */
-.text-gradient-pink {
-  background: linear-gradient(135deg, #E91E8C, #FF6BB5);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Star rating */
-.star-filled { color: #F59E0B; }
-.star-empty { color: #E5E7EB; }
-
-/* Badge */
-.badge-available {
-  background: #DCFCE7;
-  color: #16A34A;
-}
-.badge-unavailable {
-  background: #FEE2E2;
-  color: #DC2626;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   CLAYMORPHISM DESIGN SYSTEM
-   ───────────────────────────────────────────────────────────── */
-
-/* Background */
-.clay-bg { background: #FFF5F9; }
-
-/* Clay cards — white surface, inner highlight, 4-layer shadow, colored border */
-.clay-card {
-  background: #FFFFFF;
-  border-radius: 28px;
-  border: 3px solid rgba(233, 30, 140, 0.12);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 2px 0 rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(233, 30, 140, 0.10),
-    0 12px 28px rgba(233, 30, 140, 0.08),
-    0 24px 48px rgba(0, 0, 0, 0.04);
-}
-
-.clay-card-aqua {
-  background: #F0FCFE;
-  border-radius: 28px;
-  border: 3px solid rgba(6, 182, 212, 0.20);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 2px 0 rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(6, 182, 212, 0.10),
-    0 12px 28px rgba(6, 182, 212, 0.08),
-    0 24px 48px rgba(0, 0, 0, 0.04);
-}
-
-.clay-card-green {
-  background: #F0FDF4;
-  border-radius: 28px;
-  border: 3px solid rgba(16, 185, 129, 0.20);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 2px 0 rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(16, 185, 129, 0.10),
-    0 12px 28px rgba(16, 185, 129, 0.08),
-    0 24px 48px rgba(0, 0, 0, 0.04);
-}
-
-/* Primary clay button — pill, pink gradient, 3D floor shadow */
-.clay-btn {
-  background: linear-gradient(145deg, #FF4DAD, #E91E8C);
-  border: none;
-  border-radius: 9999px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    0 4px 0 #C41678,
-    0 8px 24px rgba(233, 30, 140, 0.45);
-  color: white;
-  font-family: 'Nunito Sans', sans-serif;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.clay-btn:active {
-  transform: translateY(3px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    0 1px 0 #C41678,
-    0 4px 12px rgba(233, 30, 140, 0.35);
-}
-
-/* Ghost clay button */
-.clay-btn-ghost {
-  background: #FFFFFF;
-  border: 3px solid rgba(233, 30, 140, 0.28);
-  border-radius: 9999px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 4px 0 rgba(233, 30, 140, 0.12),
-    0 8px 20px rgba(233, 30, 140, 0.08);
-  color: #E91E8C;
-  font-family: 'Nunito Sans', sans-serif;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.clay-btn-ghost:active {
-  transform: translateY(3px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 1px 0 rgba(233, 30, 140, 0.12),
-    0 4px 10px rgba(233, 30, 140, 0.06);
-}
-
-/* Aqua ghost clay button */
-.clay-btn-aqua {
-  background: #FFFFFF;
-  border: 3px solid rgba(6, 182, 212, 0.35);
-  border-radius: 9999px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 4px 0 rgba(6, 182, 212, 0.20),
-    0 8px 20px rgba(6, 182, 212, 0.12);
-  color: #06B6D4;
-  font-family: 'Nunito Sans', sans-serif;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.clay-btn-aqua:active {
-  transform: translateY(3px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 1px 0 rgba(6, 182, 212, 0.20),
-    0 4px 10px rgba(6, 182, 212, 0.10);
-}
-
-/* Clay icon bezel — circle container with pastel bg + clay shadow */
-.clay-icon-bezel {
-  border-radius: 50%;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 3px 10px rgba(0, 0, 0, 0.10);
-}
-
-/* Clay pill badge */
-.clay-pill {
-  background: #FFFFFF;
-  border-radius: 9999px;
-  border: 2px solid rgba(233, 30, 140, 0.14);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 3px 10px rgba(233, 30, 140, 0.08),
-    0 6px 16px rgba(0, 0, 0, 0.04);
-}
-
-/* Font override for kiosk */
-.kiosk-mode {
-  font-family: 'Nunito Sans', sans-serif;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   END CLAYMORPHISM
-   ───────────────────────────────────────────────────────────── */
-
-/* Glassmorphism */
-.glass {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.glass-dark {
-  background: rgba(26, 26, 46, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-}
-
-/* Gradient text */
-.text-gradient-blue {
-  background: linear-gradient(135deg, #4FC3F7, #0288D1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Mobile full-screen PWA utilities */
-.mobile-app-height {
-  height: 100dvh;
-  height: 100vh;
-}
-
-/* Prevent rubber-band / overscroll on mobile app screens */
-.no-overscroll {
-  overscroll-behavior: none;
-}
-
-/* PWA standalone mode — remove browser chrome padding */
-@media (display-mode: standalone) {
-  .pwa-only { display: block; }
-  .no-pwa { display: none; }
   body {
-    background: #FFF8F4;
+    margin: 0;
+    background: var(--color-cream-100);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior-y: none;
   }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.12;
+    text-wrap: balance;
+    margin: 0;
+  }
+  p { text-wrap: pretty; }
+
+  /* Focus: visible, on-brand, never removed */
+  :focus-visible {
+    outline: 2px solid var(--color-wine-600);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection { background: var(--color-wine-200); color: var(--color-wine-900); }
+
+  input, textarea, select, button { font: inherit; color: inherit; }
+
+  /* Scrollbar — warm, thin, unobtrusive */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-cream-300);
+    border-radius: 999px;
+    border: 3px solid var(--color-cream-100);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-wine-300); }
 }
 
-/* Shimmer animation for skeleton loading */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-.animate-shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+@layer utilities {
+  /* The signature: a fine brass hairline that separates without shouting */
+  .rule-brass {
+    background: linear-gradient(90deg, transparent, var(--color-brass-300), transparent);
+    height: 1px;
+  }
+
+  /* Arch motif — the architectural gesture the whole brand hangs on */
+  .arch { border-radius: 999px 999px var(--radius-card) var(--radius-card); }
+  .arch-sm { border-radius: 999px 999px 12px 12px; }
+
+  /* Paper grain: applied over deep burgundy fields so they read as
+     printed stock rather than flat digital colour */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.11;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .glass {
+    background: rgba(254, 252, 250, 0.82);
+    backdrop-filter: blur(14px) saturate(1.35);
+    -webkit-backdrop-filter: blur(14px) saturate(1.35);
+  }
+
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+
+  /* Safe-area padding for the installed PWA on notched phones */
+  .pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+  .pt-safe { padding-top: max(env(safe-area-inset-top), 0.5rem); }
 }
 
-/* Glow pulse for CTA buttons */
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(233, 30, 140, 0.4); }
-  50% { box-shadow: 0 0 20px 8px rgba(233, 30, 140, 0.15); }
+/* Reveal-on-scroll, driven by IntersectionObserver in useReveal().
+   Progressive enhancement: content is visible by default and only starts
+   hidden once JS has proved it can run and will un-hide it. If scripting
+   fails, the observer never fires, or the page is captured as a still, the
+   page is fully readable rather than blank. */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to   { opacity: 1; transform: none; }
 }
-.animate-glow {
-  animation: glow-pulse 2.5s ease-in-out infinite;
+.js-reveal [data-reveal] { opacity: 0; }
+.js-reveal [data-reveal].is-visible {
+  animation: reveal-up 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
+@keyframes shimmer { 100% { transform: translateX(100%); } }

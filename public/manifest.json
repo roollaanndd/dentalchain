@@ -1,24 +1,19 @@
 {
-  "name": "OMDC Dental",
-  "short_name": "OMDC",
-  "description": "Senyum Sehat, Percaya Diri Penuh — Klinik Gigi Terpercaya",
+  "name": "Burgundy Residences \u2014 Portal Warga",
+  "short_name": "Burgundy",
+  "description": "Portal warga Burgundy Residences RW 012",
   "start_url": "./app",
-  "display": "standalone",
-  "display_override": ["standalone"],
-  "background_color": "#FFF5F9",
-  "theme_color": "#E91E8C",
-  "orientation": "portrait-primary",
   "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF7F2",
+  "theme_color": "#6B1F3A",
   "lang": "id",
-  "dir": "ltr",
-  "categories": ["health", "medical"],
+  "categories": [
+    "lifestyle",
+    "utilities"
+  ],
   "icons": [
-    {
-      "src": "icons/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
     {
       "src": "icons/icon-192.svg",
       "sizes": "192x192",
@@ -29,24 +24,21 @@
       "src": "icons/icon-512.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Buat Janji",
-      "short_name": "Booking",
-      "description": "Buat janji dokter gigi",
-      "url": "./app?screen=booking",
-      "icons": [{ "src": "icons/favicon.svg", "sizes": "any" }]
+      "name": "Pinjam Barang",
+      "url": "app/pinjam"
     },
     {
-      "name": "Cek Antrian",
-      "short_name": "Antrian",
-      "description": "Cek nomor antrian Anda",
-      "url": "./app?screen=queue",
-      "icons": [{ "src": "icons/favicon.svg", "sizes": "any" }]
+      "name": "Lapor Warga",
+      "url": "app/lapor"
+    },
+    {
+      "name": "Iuran IPL",
+      "url": "app/iuran"
     }
-  ],
-  "prefer_related_applications": false
+  ]
 }

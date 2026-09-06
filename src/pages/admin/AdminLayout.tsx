@@ -1,392 +1,262 @@
-/* eslint-disable */
-import { useState, type ComponentType } from 'react';
-import { Routes, Route, NavLink, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { useCMS } from '../../context/CMSContext';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Users2, CalendarDays, ClipboardList,
-  Stethoscope, Scissors, Tag, BarChart3, Settings, LogOut,
-  Bell, Menu, Activity, Globe, ShieldCheck, UserCog, Eye, EyeOff, MapPin,
+  LayoutDashboard, Users, Armchair, Building2, Wallet, MessageSquareWarning,
+  Megaphone, CalendarDays, ShieldCheck, Settings, Menu, X, LogOut, Smartphone,
 } from 'lucide-react';
+import { Avatar, Badge, Spinner, Wordmark } from '../../components/ui';
+import { useApp } from '../../context/AppContext';
+import {
+  can, dashboardStats, hasBackofficeAccess, ROLE_LABEL, type Capability,
+} from '../../db';
+import { cn } from '../../lib/cn';
 
-import AdminDashboard from './AdminDashboard';
-import AdminQueue from './AdminQueue';
-import AdminAppointments from './AdminAppointments';
-import AdminPatients from './AdminPatients';
-import AdminDoctors from './AdminDoctors';
-import AdminServices from './AdminServices';
-import AdminPromotions from './AdminPromotions';
-import AdminReports from './AdminReports';
-import AdminSettings from './AdminSettings';
-import AdminWebsite from './AdminWebsite';
-import AdminUsers from './AdminUsers';
-import AdminRoles from './AdminRoles';
-import AdminBranches from './AdminBranches';
-import AdminBroadcast from './AdminBroadcast';
+const Overview = lazy(() => import('./Overview'));
+const Residents = lazy(() => import('./Residents'));
+const Inventory = lazy(() => import('./Inventory'));
+const Facilities = lazy(() => import('./Facilities'));
+const Finance = lazy(() => import('./Finance'));
+const Reports = lazy(() => import('./Reports'));
+const Content = lazy(() => import('./Content'));
+const Gate = lazy(() => import('./Gate'));
+const SettingsPage = lazy(() => import('./Settings'));
 
-import { AuthProvider, useAuth } from '../../context/AuthContext';
-
-const SIDEBAR_BG = '#1A1A2E';
-const PINK = '#E91E8C';
-const BLUE = '#4FC3F7';
-
-// ─── NAV ITEMS ────────────────────────────────────────────────────────────────
-type NavItem = {
-  path: string;
+interface NavItem {
+  to: string;
+  icon: typeof LayoutDashboard;
   label: string;
-  icon: ComponentType<{ size?: number; className?: string }>;
-  end?: boolean;
-  permission?: string;
-  group?: string;
-};
+  cap: Capability;
+  badge?: (s: ReturnType<typeof dashboardStats>) => number;
+}
 
-const NAV_ITEMS: NavItem[] = [
-  { path: '', label: 'Dashboard', icon: LayoutDashboard, end: true, group: 'main' },
-  { path: 'queue', label: 'Antrian', icon: Activity, group: 'clinic' },
-  { path: 'appointments', label: 'Jadwal', icon: CalendarDays, group: 'clinic' },
-  { path: 'patients', label: 'Pasien', icon: Users2, group: 'clinic', permission: 'patients.view' },
-  { path: 'doctors', label: 'Dokter', icon: Stethoscope, group: 'clinic' },
-  { path: 'services', label: 'Layanan', icon: Scissors, group: 'clinic' },
-  { path: 'branches', label: 'Lokasi Cabang', icon: MapPin, group: 'clinic' },
-  { path: 'promotions', label: 'Promo', icon: Tag, group: 'content' },
-  { path: 'broadcast', label: 'Broadcast', icon: Bell, group: 'content', permission: 'website.view' },
-  { path: 'website', label: 'Website', icon: Globe, group: 'content', permission: 'website.view' },
-  { path: 'reports', label: 'Laporan', icon: BarChart3, group: 'reports', permission: 'reports.view' },
-  { path: 'users', label: 'Pengguna', icon: UserCog, group: 'admin', permission: 'users.view' },
-  { path: 'roles', label: 'Peran & Akses', icon: ShieldCheck, group: 'admin', permission: 'roles.view' },
-  { path: 'settings', label: 'Pengaturan', icon: Settings, group: 'admin', permission: 'settings.view' },
+const NAV: NavItem[] = [
+  { to: '/admin', icon: LayoutDashboard, label: 'Ringkasan', cap: 'announcement.read' },
+  {
+    to: '/admin/warga', icon: Users, label: 'Warga', cap: 'resident.read.all',
+    badge: (s) => s.pendingResidents,
+  },
+  {
+    to: '/admin/inventaris', icon: Armchair, label: 'Inventaris', cap: 'booking.read.all',
+    badge: (s) => s.pendingBookings,
+  },
+  {
+    to: '/admin/fasilitas', icon: Building2, label: 'Fasilitas', cap: 'booking.read.all',
+    badge: (s) => s.pendingFacility,
+  },
+  { to: '/admin/keuangan', icon: Wallet, label: 'Iuran & Kas', cap: 'dues.manage' },
+  {
+    to: '/admin/laporan', icon: MessageSquareWarning, label: 'Laporan Warga',
+    cap: 'complaint.read.all', badge: (s) => s.openComplaints,
+  },
+  { to: '/admin/konten', icon: Megaphone, label: 'Konten & Agenda', cap: 'announcement.manage' },
+  { to: '/admin/pos', icon: ShieldCheck, label: 'Pos Jaga', cap: 'guest.read.all' },
+  { to: '/admin/pengaturan', icon: Settings, label: 'Pengaturan', cap: 'site.manage' },
 ];
 
-const NAV_GROUPS: Record<string, string> = {
-  main: '',
-  clinic: 'Klinik',
-  content: 'Konten',
-  reports: 'Analitik',
-  admin: 'Sistem',
-};
-
-const BREADCRUMB_MAP: Record<string, string> = {
-  '': 'Dashboard', queue: 'Antrian', appointments: 'Jadwal & Janji',
-  patients: 'Data Pasien', doctors: 'Manajemen Dokter', services: 'Layanan & Harga',
-  promotions: 'Promo & Diskon', broadcast: 'Broadcast Notifikasi', website: 'Manajemen Website', reports: 'Laporan & Analitik',
-  users: 'Pengguna', roles: 'Peran & Akses', settings: 'Pengaturan', branches: 'Lokasi Cabang',
-};
-
-// ─── LOGIN FORM ───────────────────────────────────────────────────────────────
-function AdminLogin() {
-  const { login } = useAuth();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPw, setShowPw] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    setTimeout(() => {
-      const result = login(username, password);
-      if (!result.ok) {
-        setError(result.error ?? 'Login gagal.');
-        setLoading(false);
-      }
-    }, 600);
-  };
-
+function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center relative" style={{ background: SIDEBAR_BG }}>
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-10" style={{ background: PINK }} />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full opacity-10" style={{ background: BLUE }} />
-      </div>
-
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="relative z-10 w-full max-w-sm mx-4">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="p-8 pb-6" style={{ background: 'linear-gradient(135deg, #1A1A2E, #16213E)' }}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${PINK}, #FF6BB5)` }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 3C9.24 3 7 5.24 7 8c0 1.74.88 3.26 2.2 4.17L12 21l2.8-8.83C16.12 11.26 17 9.74 17 8c0-2.76-2.24-5-5-5z" fill="white" opacity="0.9" />
-                  <circle cx="12" cy="8" r="2" fill="white" />
-                </svg>
-              </div>
-              <div>
-                <div className="text-white font-bold text-xl leading-tight">OMDC Dental</div>
-                <div className="text-gray-400 text-sm">Admin Panel</div>
-              </div>
-            </div>
-            <h1 className="text-white text-xl font-semibold">Masuk sebagai Admin</h1>
-            <p className="text-gray-400 text-sm mt-1">Kelola klinik Anda dengan mudah</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-8 pt-6 space-y-4">
-            <AnimatePresence>
-              {error && (
-                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
-                  {error}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
-              <input type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Masukkan username"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-400 text-gray-800 placeholder-gray-400 text-sm" required />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-              <div className="relative">
-                <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Masukkan password"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-400 text-gray-800 placeholder-gray-400 text-sm pr-12" required />
-                <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <button type="submit" disabled={loading}
-              className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all disabled:opacity-70"
-              style={{ background: loading ? '#ccc' : `linear-gradient(135deg, ${PINK}, #FF6BB5)` }}>
-              {loading ? 'Memuat...' : 'Masuk'}
-            </button>
-
-            <div className="text-center">
-              <p className="text-xs text-gray-400">
-                Hubungi administrator untuk kredensial login.
-              </p>
-            </div>
-          </form>
-        </div>
-      </motion.div>
+    <div className="flex min-h-[50vh] items-center justify-center">
+      <Spinner size={24} />
     </div>
   );
 }
 
-// ─── SIDEBAR ─────────────────────────────────────────────────────────────────
-function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
-  const { logout, hasPermission, currentRole } = useAuth();
-  const { cms } = useCMS();
+export default function AdminLayout() {
+  const { profile, signOut } = useApp();
+  const [open, setOpen] = useState(false);
+  const location = useLocation();
 
-  const visibleItems = NAV_ITEMS.filter(item =>
-    !item.permission || hasPermission(item.permission)
-  );
+  useEffect(() => setOpen(false), [location.pathname]);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, [location.pathname]);
 
-  const groups = Array.from(new Set(visibleItems.map(i => i.group ?? 'main')));
+  if (!profile) return <Navigate to="/app/masuk" replace />;
+
+  // Residents have no console at all — send them back to their portal.
+  if (!hasBackofficeAccess(profile.role) || profile.status !== 'active') {
+    return <Navigate to="/app" replace />;
+  }
+
+  const actor = { id: profile.id, role: profile.role, status: profile.status };
+  const stats = dashboardStats(actor);
+  const visible = NAV.filter((n) => can(actor, n.cap));
 
   return (
-    <motion.aside
-      animate={{ width: collapsed ? 72 : 280 }}
-      transition={{ duration: 0.25, ease: 'easeInOut' }}
-      className="flex-shrink-0 flex flex-col h-full overflow-hidden"
-      style={{ background: SIDEBAR_BG }}
-    >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-6 border-b border-white/10">
-        {cms.logoUrl ? (
-          <img
-            src={cms.logoUrl}
-            alt="Logo"
-            style={{
-              height: 36,
-              maxWidth: collapsed ? 36 : 120,
-              objectFit: 'contain',
-              filter: 'brightness(0) invert(1)',
-              transition: 'max-width 0.25s',
-            }}
-          />
-        ) : (
-          <>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${PINK}, #FF6BB5)` }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M12 3C9.24 3 7 5.24 7 8c0 1.74.88 3.26 2.2 4.17L12 21l2.8-8.83C16.12 11.26 17 9.74 17 8c0-2.76-2.24-5-5-5z" fill="white" opacity="0.9" />
-                <circle cx="12" cy="8" r="2" fill="white" />
-              </svg>
-            </div>
-            {!collapsed && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}>
-                <div className="text-white font-bold text-base leading-tight">OMDC Dental</div>
-                <div className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Admin Panel</div>
-              </motion.div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">
-        {groups.map(group => {
-          const groupLabel = NAV_GROUPS[group];
-          const items = visibleItems.filter(i => (i.group ?? 'main') === group);
-          return (
-            <div key={group}>
-              {!collapsed && groupLabel && (
-                <div className="px-3 pt-3 pb-1.5 text-[10px] font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                  {groupLabel}
-                </div>
-              )}
-              {items.map(item => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.path}
-                    to={`/admin/${item.path}`}
-                    end={item.end}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group relative ${
-                        isActive ? 'text-white' : 'text-white/50 hover:text-white hover:bg-white/5'
-                      }`
-                    }
-                    style={({ isActive }) => isActive ? { background: PINK } : {}}
-                  >
-                    {() => (
-                      <>
-                        <Icon size={20} className="flex-shrink-0" />
-                        {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
-                        {collapsed && (
-                          <div className="absolute left-full ml-2 px-2 py-1 rounded-lg text-xs font-medium text-white opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity" style={{ background: '#333' }}>
-                            {item.label}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </NavLink>
-                );
-              })}
-            </div>
-          );
-        })}
-      </nav>
-
-      {/* Bottom: Role badge + Logout */}
-      <div className="px-3 pb-4 border-t border-white/10 pt-3 space-y-2">
-        {!collapsed && currentRole && (
-          <div className="px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.06)' }}>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Peran Aktif</div>
-            <div className="text-sm font-medium text-white mt-0.5">{currentRole.name}</div>
+    <div className="min-h-screen bg-cream-100">
+      {/* Top bar */}
+      <header className="sticky top-0 z-40 border-b border-cream-300 bg-wine-900">
+        <div className="h-[3px] bg-gradient-to-r from-brass-500 via-brass-300 to-brass-500" />
+        <div className="flex h-[58px] items-center justify-between gap-3 px-4">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-label={open ? 'Tutup menu' : 'Buka menu'}
+              className="rounded-lg p-2 text-cream-100 transition-colors hover:bg-cream-100/12 lg:hidden"
+            >
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <Link to="/admin" className="flex items-center gap-2.5">
+              <Wordmark invert />
+              <Badge tone="brass" className="hidden sm:inline-flex">Konsol</Badge>
+            </Link>
           </div>
-        )}
-        <button
-          onClick={logout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-red-500/10 transition-all group relative"
-        >
-          <LogOut size={20} className="flex-shrink-0" />
-          {!collapsed && <span className="text-sm font-medium">Keluar</span>}
-          {collapsed && (
-            <div className="absolute left-full ml-2 px-2 py-1 rounded-lg text-xs font-medium text-white opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity" style={{ background: '#333' }}>
-              Keluar
+
+          <div className="flex items-center gap-2">
+            <Link
+              to="/app"
+              className="hidden items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12.5px] font-medium text-cream-100/70 transition-colors hover:bg-cream-100/12 hover:text-cream-100 sm:flex"
+            >
+              <Smartphone size={14} />
+              Portal Warga
+            </Link>
+            <div className="flex items-center gap-2.5 border-l border-cream-100/12 pl-3">
+              <Avatar name={profile.full_name} url={profile.avatar_url} size={30} />
+              <div className="hidden leading-tight sm:block">
+                <p className="text-[12.5px] font-medium text-cream-100">
+                  {profile.full_name.split(' ')[0]}
+                </p>
+                <p className="text-[10.5px] text-brass-300">{ROLE_LABEL[profile.role]}</p>
+              </div>
             </div>
+            <button
+              type="button" onClick={signOut} aria-label="Keluar"
+              className="rounded-lg p-2 text-cream-100/60 transition-colors hover:bg-cream-100/12 hover:text-cream-100"
+            >
+              <LogOut size={17} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto flex max-w-[1400px]">
+        {/* Sidebar */}
+        <aside
+          className={cn(
+            'fixed inset-y-0 left-0 z-40 w-[248px] shrink-0 border-r border-cream-300 bg-cream-50',
+            'transition-transform duration-300 lg:sticky lg:top-[61px] lg:z-auto lg:h-[calc(100vh-61px)] lg:translate-x-0',
+            open ? 'translate-x-0 pt-[61px] shadow-[var(--shadow-deep)]' : '-translate-x-full pt-[61px] lg:pt-0',
           )}
-        </button>
-      </div>
-    </motion.aside>
-  );
-}
+        >
+          <nav className="space-y-1 overflow-y-auto p-3">
+            {visible.map((n) => {
+              const count = n.badge?.(stats) ?? 0;
+              return (
+                <NavLink
+                  key={n.to}
+                  to={n.to}
+                  end={n.to === '/admin'}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 rounded-[var(--radius-btn)] px-3 py-2.5 text-[13.5px] font-medium transition-colors',
+                      isActive
+                        ? 'bg-wine-700 text-cream-50 shadow-[var(--shadow-soft)]'
+                        : 'text-ink-700 hover:bg-cream-200',
+                    )
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <n.icon size={17} className="shrink-0" />
+                      <span className="flex-1 truncate">{n.label}</span>
+                      {count > 0 && (
+                        <span
+                          className={cn(
+                            'tabular flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10.5px] font-bold',
+                            isActive ? 'bg-cream-50/25 text-cream-50' : 'bg-bad-600 text-white',
+                          )}
+                        >
+                          {count > 99 ? '99+' : count}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
+          </nav>
 
-// ─── TOPBAR ──────────────────────────────────────────────────────────────────
-function TopBar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
-  const { currentUser, currentRole } = useAuth();
-  const [showNotifs, setShowNotifs] = useState(false);
-  const path = window.location.pathname.replace('/admin', '').replace(/^\//, '');
-  const label = BREADCRUMB_MAP[path] ?? 'Admin';
-
-  return (
-    <header className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between flex-shrink-0">
-      <div className="flex items-center gap-4">
-        <button onClick={onToggleSidebar} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-          <Menu size={20} className="text-gray-600" />
-        </button>
-        <div>
-          <div className="text-xs text-gray-400">Admin Panel</div>
-          <div className="text-sm font-semibold text-gray-800">{label}</div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="relative">
-          <button onClick={() => setShowNotifs(v => !v)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative">
-            <Bell size={20} className="text-gray-600" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: PINK }} />
-          </button>
-          <AnimatePresence>
-            {showNotifs && (
-              <motion.div
-                initial={{ opacity: 0, y: -8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden"
-              >
-                <div className="px-4 py-3 border-b border-gray-100"><div className="font-semibold text-gray-800 text-sm">Notifikasi</div></div>
-                {[
-                  { msg: 'Pasien baru: Ahmad Fauzi mendaftar', time: '5 menit lalu' },
-                  { msg: 'Antrian A020 belum dikonfirmasi', time: '12 menit lalu' },
-                  { msg: 'drg. Reza Rizki sedang libur hari ini', time: '1 jam lalu' },
-                ].map((n, i) => (
-                  <div key={i} className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-50 last:border-0">
-                    <p className="text-sm text-gray-700">{n.msg}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{n.time}</p>
-                  </div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {currentUser && (
-          <div className="flex items-center gap-2 pl-3 border-l border-gray-100">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: currentRole?.color ? `${currentRole.color}` : `linear-gradient(135deg, ${PINK}, #FF6BB5)` }}>
-              {currentUser.avatar}
-            </div>
-            <div className="hidden sm:block">
-              <div className="text-sm font-medium text-gray-800">{currentUser.name}</div>
-              <div className="text-xs text-gray-400">{currentRole?.name ?? 'Admin'}</div>
-            </div>
+          <div className="border-t border-cream-300 p-3">
+            <Link
+              to="/"
+              className="flex items-center gap-3 rounded-[var(--radius-btn)] px-3 py-2.5 text-[13px] text-ink-500 transition-colors hover:bg-cream-200"
+            >
+              <CalendarDays size={16} />
+              Situs Publik
+            </Link>
           </div>
+        </aside>
+
+        {open && (
+          <div
+            className="fixed inset-0 z-30 bg-wine-950/40 lg:hidden"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
         )}
-      </div>
-    </header>
-  );
-}
 
-// ─── INNER LAYOUT (needs Auth context) ───────────────────────────────────────
-function InnerLayout() {
-  const { isLoggedIn } = useAuth();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  if (!isLoggedIn) return <AdminLogin />;
-
-  return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#F8FAFC' }}>
-      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(v => !v)} />
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <TopBar onToggleSidebar={() => setSidebarCollapsed(v => !v)} />
-        <main className="flex-1 overflow-y-auto" style={{ background: '#F8FAFC' }}>
-          <Routes>
-            <Route path="/" element={<AdminDashboard />} />
-            <Route path="/queue" element={<AdminQueue />} />
-            <Route path="/appointments" element={<AdminAppointments />} />
-            <Route path="/patients" element={<AdminPatients />} />
-            <Route path="/doctors" element={<AdminDoctors />} />
-            <Route path="/services" element={<AdminServices />} />
-            <Route path="/promotions" element={<AdminPromotions />} />
-            <Route path="/broadcast" element={<AdminBroadcast />} />
-            <Route path="/website" element={<AdminWebsite />} />
-            <Route path="/reports" element={<AdminReports />} />
-            <Route path="/users" element={<AdminUsers />} />
-            <Route path="/roles" element={<AdminRoles />} />
-            <Route path="/branches" element={<AdminBranches />} />
-            <Route path="/settings" element={<AdminSettings />} />
-          </Routes>
+        {/* Content */}
+        <main className="min-w-0 flex-1 p-4 lg:p-7">
+          <Suspense fallback={<Loading />}>
+            <Routes>
+              <Route index element={<Overview />} />
+              <Route path="warga" element={<Gated cap="resident.read.all"><Residents /></Gated>} />
+              <Route path="inventaris" element={<Gated cap="booking.read.all"><Inventory /></Gated>} />
+              <Route path="fasilitas" element={<Gated cap="booking.read.all"><Facilities /></Gated>} />
+              <Route path="keuangan" element={<Gated cap="dues.manage"><Finance /></Gated>} />
+              <Route path="laporan" element={<Gated cap="complaint.read.all"><Reports /></Gated>} />
+              <Route path="konten" element={<Gated cap="announcement.manage"><Content /></Gated>} />
+              <Route path="pos" element={<Gated cap="guest.read.all"><Gate /></Gated>} />
+              <Route path="pengaturan" element={<Gated cap="site.manage"><SettingsPage /></Gated>} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </div>
   );
 }
 
-// ─── ADMIN LAYOUT (wraps auth provider only; CMSProvider is in App.tsx) ─────
-export default function AdminLayout() {
+/**
+ * Route-level capability gate. The repository refuses the work regardless;
+ * this stops an unauthorised officer landing on a screen full of empty
+ * panels and error toasts.
+ */
+function Gated({ cap, children }: { cap: Capability; children: React.ReactNode }) {
+  const { profile } = useApp();
+  if (!profile) return <Navigate to="/app/masuk" replace />;
+  const actor = { id: profile.id, role: profile.role, status: profile.status };
+  if (!can(actor, cap)) {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <div className="mx-auto mb-4 flex h-13 w-13 items-center justify-center rounded-2xl bg-bad-100 text-bad-600">
+          <ShieldCheck size={24} />
+        </div>
+        <h1 className="text-[20px] text-wine-900">Akses ditolak</h1>
+        <p className="mt-2 text-[13.5px] leading-relaxed text-ink-500">
+          Peran {ROLE_LABEL[profile.role]} tidak memiliki izin untuk membuka halaman ini.
+        </p>
+        <Link to="/admin" className="mt-5 inline-block text-[13.5px] font-medium text-wine-700 hover:underline">
+          Kembali ke Ringkasan
+        </Link>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
+/** Shared page header for admin screens. */
+export function AdminHeader({
+  title, subtitle, action,
+}: { title: string; subtitle?: string; action?: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <InnerLayout />
-    </AuthProvider>
+    <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 className="text-[26px] text-wine-900">{title}</h1>
+        {subtitle && <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-500">{subtitle}</p>}
+      </div>
+      {action}
+    </div>
   );
 }
