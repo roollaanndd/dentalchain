@@ -44,7 +44,7 @@ function Shell() {
 export default function App() {
   return (
     <AppProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Shell />
       </BrowserRouter>
     </AppProvider>

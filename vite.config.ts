@@ -4,6 +4,9 @@ import path from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // GitHub Pages serves this project at /<repo>/, so the asset base has to
+  // match or every chunk 404s. Vercel/Netlify serve from the root.
+  base: process.env.GITHUB_PAGES === 'true' ? '/dentalchain/' : '/',
   plugins: [react(), tailwindcss()],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
   build: {

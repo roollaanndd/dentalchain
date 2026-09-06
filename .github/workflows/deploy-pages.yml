@@ -3,30 +3,26 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
+      - claude/repo-recap-xe3du0
       - main
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Auto-merge to main"]
-    types:
-      - completed
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Never let two deploys race; let a newer one wait rather than cancel.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
   build:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
 
       - uses: actions/setup-node@v4
         with:
@@ -36,26 +32,45 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Typecheck
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      # enablement:true turns Pages on for the repo if it isn't already,
+      # so this works without a manual visit to repo settings.
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
       - name: Build
         run: npm run build
         env:
-          GITHUB_PAGES: true
+          GITHUB_PAGES: 'true'
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      # Pages has no SPA rewrite, so a hard refresh of /app/pinjam would 404.
+      # Serving index.html as the 404 page hands the route back to the router.
+      - name: SPA fallback
+        run: cp dist/index.html dist/404.html
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      # Pages ignores files starting with an underscore unless this exists.
+      - name: Disable Jekyll processing
+        run: touch dist/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
+    name: Deploy
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
