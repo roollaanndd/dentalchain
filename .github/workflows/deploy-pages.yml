@@ -1,9 +1,16 @@
 name: Deploy to GitHub Pages
 
+# Not run on pull requests: a missing Pages site is a repository setting,
+# not a code defect, and must not report as a failing PR check. CI (see
+# ci.yml) is what gates a PR.
+#
+# NOTE: this needs Pages enabled on the repository first —
+# Settings -> Pages -> Source: "GitHub Actions". The workflow token cannot
+# create the Pages site itself (that needs admin scope), so until then this
+# workflow fails at "Configure Pages" by design.
 on:
   push:
     branches:
-      - claude/repo-recap-xe3du0
       - main
   workflow_dispatch:
 
@@ -32,14 +39,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Typecheck
-        run: npm run lint
-
-      - name: Unit tests
-        run: npm test
-
-      # enablement:true turns Pages on for the repo if it isn't already,
-      # so this works without a manual visit to repo settings.
+      # enablement:true self-enables Pages only where the workflow token has
+      # admin scope; on this repository it does not, so Pages must be turned
+      # on once by hand (see the note at the top of this file).
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
