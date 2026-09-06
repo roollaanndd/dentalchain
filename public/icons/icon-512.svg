@@ -1,34 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#BE185D"/>
-      <stop offset="40%" stop-color="#E91E8C"/>
-      <stop offset="100%" stop-color="#FF6BB5"/>
-    </linearGradient>
-    <linearGradient id="shine" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="rgba(255,255,255,0.2)"/>
-      <stop offset="60%" stop-color="rgba(255,255,255,0)"/>
-    </linearGradient>
-  </defs>
-  <!-- Full background for maskable icon (content in safe zone 80%) -->
-  <rect width="512" height="512" fill="url(#bg)"/>
-  <rect width="512" height="280" fill="url(#shine)"/>
-  <!-- Decorative circles -->
-  <circle cx="430" cy="90" r="130" fill="rgba(255,255,255,0.06)"/>
-  <circle cx="80" cy="440" r="90" fill="rgba(255,255,255,0.05)"/>
-  <circle cx="460" cy="380" r="60" fill="rgba(255,255,255,0.04)"/>
-  <!-- Tooth shape (centered, in safe zone) -->
-  <path d="M256 88C214 88 180 122 180 164c0 30 11 52 22 75 11 23 17 40 17 63 0 9.5 6.5 16.5 16 16.5H257c9.5 0 16-7 16-16.5 0-23 6-40 17-63 11-23 22-45 22-75 0-42-34-76-56-76z" fill="white" opacity="0.96"/>
-  <!-- Root dividers -->
-  <rect x="218" y="268" width="20" height="58" rx="10" fill="white" opacity="0.68"/>
-  <rect x="274" y="268" width="20" height="58" rx="10" fill="white" opacity="0.68"/>
-  <!-- Shine on tooth -->
-  <ellipse cx="216" cy="138" rx="20" ry="32" fill="white" opacity="0.15" transform="rotate(-22 216 138)"/>
-  <!-- OMDC label -->
-  <text x="256" y="390" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="44" fill="white" opacity="0.92" letter-spacing="4">OMDC</text>
-  <text x="256" y="422" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="400" font-size="20" fill="rgba(255,255,255,0.72)" letter-spacing="5">DENTAL</text>
-  <!-- Sparkles -->
-  <circle cx="152" cy="120" r="6" fill="white" opacity="0.45"/>
-  <circle cx="370" cy="96" r="8" fill="white" opacity="0.35"/>
-  <circle cx="390" cy="260" r="5" fill="white" opacity="0.3"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 48 48">
+  <rect width="48" height="48" rx="10" fill="#6B1F3A"/>
+  <path d="M11 40V23a13 13 0 0 1 26 0v17" stroke="#FBF7F2" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+  <path d="M19.5 40V27a4.5 4.5 0 0 1 9 0v13" stroke="#C9A46B" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <circle cx="24" cy="15" r="2.4" fill="#C9A46B"/>
 </svg>

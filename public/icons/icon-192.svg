@@ -1,35 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
-  <defs>
-    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#BE185D"/>
-      <stop offset="50%" stop-color="#E91E8C"/>
-      <stop offset="100%" stop-color="#FF6BB5"/>
-    </linearGradient>
-    <linearGradient id="g2" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="rgba(255,255,255,0.22)"/>
-      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-    </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
-  </defs>
-  <!-- Background rounded square -->
-  <rect width="192" height="192" rx="44" fill="url(#g1)"/>
-  <!-- Shine overlay -->
-  <rect width="192" height="100" rx="0" fill="url(#g2)" rx-workaround="44"/>
-  <!-- Decorative circles -->
-  <circle cx="160" cy="36" r="52" fill="rgba(255,255,255,0.07)"/>
-  <circle cx="30" cy="160" r="36" fill="rgba(255,255,255,0.05)"/>
-  <!-- Tooth shape -->
-  <path d="M96 34C77 34 62 49 62 68c0 12 4.5 21 9 30.5 4.5 9.5 7 16.5 7 26 0 4 2.8 7 6.8 7H107c4 0 6.8-3 6.8-7 0-9.5 2.5-16.5 7-26 4.5-9.5 9-18.5 9-30.5 0-19-15-34-33.8-34z" fill="white" opacity="0.95"/>
-  <!-- Root dividers -->
-  <rect x="82" y="100" width="8" height="22" rx="4" fill="white" opacity="0.65"/>
-  <rect x="102" y="100" width="8" height="22" rx="4" fill="white" opacity="0.65"/>
-  <!-- Shine on tooth -->
-  <ellipse cx="80" cy="58" rx="9" ry="14" fill="white" opacity="0.18" transform="rotate(-25 80 58)"/>
-  <!-- Sparkle dots -->
-  <circle cx="145" cy="72" r="4" fill="white" opacity="0.5"/>
-  <circle cx="52" cy="50" r="3" fill="white" opacity="0.4"/>
-  <circle cx="155" cy="100" r="2.5" fill="white" opacity="0.3"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 48 48">
+  <rect width="48" height="48" rx="10" fill="#6B1F3A"/>
+  <path d="M11 40V23a13 13 0 0 1 26 0v17" stroke="#FBF7F2" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+  <path d="M19.5 40V27a4.5 4.5 0 0 1 9 0v13" stroke="#C9A46B" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <circle cx="24" cy="15" r="2.4" fill="#C9A46B"/>
 </svg>

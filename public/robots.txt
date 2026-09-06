@@ -1,10 +1,9 @@
 User-agent: *
-Allow: /
-
-Sitemap: https://roollaanndd.github.io/2kang/sitemap.xml
-
-# Block admin and internal routes from search indexing
-Disallow: /admin/
-Disallow: /kiosk/
-Disallow: /app/
-Disallow: /mobile/
+Allow: /$
+Allow: /tentang
+Allow: /fasilitas
+Allow: /inventaris
+Allow: /informasi
+Allow: /kontak
+Disallow: /app
+Disallow: /admin

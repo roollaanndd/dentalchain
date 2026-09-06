@@ -1,13 +1,23 @@
-import {StrictMode} from 'react';
-import {createRoot} from 'react-dom/client';
-import { HelmetProvider } from 'react-helmet-async';
-import App from './App.tsx';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App';
 import './index.css';
 
-createRoot(document.getElementById('root')!).render(
+const el = document.getElementById('root');
+if (!el) throw new Error('#root not found');
+
+createRoot(el).render(
   <StrictMode>
-    <HelmetProvider>
-      <App />
-    </HelmetProvider>
+    <App />
   </StrictMode>,
 );
+
+// Register the service worker in production only, so dev never serves a
+// cached bundle back at you.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      /* offline support is a progressive enhancement; ignore failures */
+    });
+  });
+}
