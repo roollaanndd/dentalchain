@@ -679,10 +679,17 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>() {
     const nodes = el.querySelectorAll<HTMLElement>('[data-reveal]');
     if (!nodes.length) return;
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      typeof IntersectionObserver === 'undefined'
+    ) {
       nodes.forEach((n) => n.classList.add('is-visible'));
       return;
     }
+
+    // Only now is it safe to let the CSS hide anything: we are certain the
+    // observer exists and will reveal it again.
+    document.documentElement.classList.add('js-reveal');
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {

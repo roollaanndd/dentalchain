@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Logo, Spinner, ToastStack } from './components/ui';
 
@@ -41,12 +41,19 @@ function Shell() {
   );
 }
 
+declare const __ARTIFACT__: boolean;
+
 export default function App() {
+  // A single-file build has no server to rewrite paths, so it routes on the
+  // hash instead. Every other target uses real paths.
+  const Router = __ARTIFACT__ ? HashRouter : BrowserRouter;
+  const routerProps = __ARTIFACT__ ? {} : { basename: import.meta.env.BASE_URL };
+
   return (
     <AppProvider>
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <Router {...routerProps}>
         <Shell />
-      </BrowserRouter>
+      </Router>
     </AppProvider>
   );
 }

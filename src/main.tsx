@@ -14,7 +14,9 @@ createRoot(el).render(
 
 // Register the service worker in production only, so dev never serves a
 // cached bundle back at you.
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+declare const __ARTIFACT__: boolean;
+
+if ('serviceWorker' in navigator && import.meta.env.PROD && !__ARTIFACT__) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
       /* offline support is a progressive enhancement; ignore failures */

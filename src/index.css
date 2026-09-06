@@ -164,12 +164,18 @@
   .pt-safe { padding-top: max(env(safe-area-inset-top), 0.5rem); }
 }
 
-/* Reveal-on-scroll, driven by IntersectionObserver in useReveal() */
+/* Reveal-on-scroll, driven by IntersectionObserver in useReveal().
+   Progressive enhancement: content is visible by default and only starts
+   hidden once JS has proved it can run and will un-hide it. If scripting
+   fails, the observer never fires, or the page is captured as a still, the
+   page is fully readable rather than blank. */
 @keyframes reveal-up {
   from { opacity: 0; transform: translate3d(0, 18px, 0); }
   to   { opacity: 1; transform: none; }
 }
-[data-reveal] { opacity: 0; }
-[data-reveal].is-visible { animation: reveal-up 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.js-reveal [data-reveal] { opacity: 0; }
+.js-reveal [data-reveal].is-visible {
+  animation: reveal-up 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
 
 @keyframes shimmer { 100% { transform: translateX(100%); } }
